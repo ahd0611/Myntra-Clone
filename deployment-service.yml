@@ -2,20 +2,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: myntra
+  name: Myntra
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: myntra
+      app: Myntra
   template:
     metadata:
       labels:
-        app: myntra
+        app: Myntra
     spec:
       containers:
-      - name: myntra
-        image: sevenajay/myntra:latest
+      - name: Myntra
+        image: ahd0611/myntra:latest
         ports:
         - containerPort: 3000   # Use port 3000
 
@@ -26,7 +26,7 @@ metadata:
   name: myntra-service
 spec:
   selector:
-    app: myntra
+    app: Myntra
   ports:
   - protocol: TCP
     port: 80                 # Expose port 80
