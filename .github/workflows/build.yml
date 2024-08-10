@@ -16,38 +16,14 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Build & Analyze with SonarQube 
-        uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      - name: Npm Install
-        run: npm install
-
-      - name: Trivy FS Scan 
-        run: trivy fs . > trivyfs.txt 
-
-      - name: Docker Build & Push
-        run: |
-          docker build -t myntra .
-          docker tag myntra ahd0611/myntra:latest
-          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
-          docker push ahd0611/myntra:latest
-        env:
-          DOCKER_CLI_ACI: 1
-
-      - name: Trivy Image Scan
-        run: trivy image ahd0611/myntra:latest > trivyimage.txt
-  deploy: 
-    needs: build-analyze-scan
-    runs-on: [ahd0611]
-    steps:
-
       - name: Run the Container
-        run: docker run -d --name myntra -p 3000:3000 ahd0611/myntra:latest
+        run: |
+          docker stop myntra
+          docker rm myntra
+        
 
       - name: Update KubeConfig
         run: aws eks --region ap-south-1 update-kubeconfig --name EKS_CLOUD
 
       - name: Deploy to Kubernetes
-        run: kubectl apply -f deployment-service.yml    
+        run: kubectl delete -f deployment-service.yml    
