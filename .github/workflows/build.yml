@@ -9,7 +9,7 @@ on:
 jobs:
   build-analyze-scan:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: [ahd0611]
     steps:
       - name: Git Checkout
         uses: actions/checkout@v2
@@ -23,3 +23,27 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       - name: Npm Install
         run: npm install
+
+      - name: Docker Login
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker Scout Scan
+        run: |
+          docker-scout quickview fs://.
+          docker-scout cves fs://.
+
+      - name: Docker Build & Push
+        run: |
+          docker build -t myntra .
+          docker tag myntra ahd0611/myntra:latest
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+          docker push ahd0611/myntra:latest
+        env:
+          DOCKER_CLI_ACI: 1
+
+      - name: Docker Scout Image Scan   
+        run:  |
+          docker-scout quickview ahd0611/myntra:latest
+          docker-scout cves ahd0611/myntra:latest 
+
+
